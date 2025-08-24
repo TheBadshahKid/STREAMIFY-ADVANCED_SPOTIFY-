@@ -79,7 +79,23 @@ if (process.env.NODE_ENV === "production") {
 
 // error handler
 app.use((err, req, res, next) => {
-	res.status(500).json({ message: process.env.NODE_ENV === "production" ? "Internal server error" : err.message });
+	console.error("🚨 Error occurred:", {
+		message: err.message,
+		stack: err.stack,
+		url: req.url,
+		method: req.method,
+		body: req.body,
+		files: req.files ? Object.keys(req.files) : 'No files',
+		headers: req.headers
+	});
+	
+	res.status(err.status || 500).json({ 
+		message: process.env.NODE_ENV === "production" ? "Internal server error" : err.message,
+		error: process.env.NODE_ENV === "production" ? {} : {
+			stack: err.stack,
+			name: err.name
+		}
+	});
 });
 
 // Ensure temp directory exists

@@ -92,8 +92,27 @@ export const createSong = async (req, res, next) => {
 		console.log("📈 CreateSong request:", {
 			body: req.body,
 			files: req.files ? Object.keys(req.files) : 'No files',
-			contentType: req.headers['content-type']
+			contentType: req.headers['content-type'],
+			userAgent: req.headers['user-agent']
 		});
+
+		// Additional debugging for files
+		if (req.files) {
+			console.log("📂 File details:", {
+				audioFile: req.files.audioFile ? {
+					name: req.files.audioFile.name,
+					size: req.files.audioFile.size,
+					mimetype: req.files.audioFile.mimetype,
+					tempFilePath: req.files.audioFile.tempFilePath
+				} : 'Not found',
+				imageFile: req.files.imageFile ? {
+					name: req.files.imageFile.name,
+					size: req.files.imageFile.size,
+					mimetype: req.files.imageFile.mimetype,
+					tempFilePath: req.files.imageFile.tempFilePath
+				} : 'Not found'
+			});
+		}
 
 		if (!req.files || !req.files.audioFile || !req.files.imageFile) {
 			console.error("❌ Missing files in request:", {
