@@ -24,7 +24,7 @@ interface NewSong {
 }
 
 const AddSongDialog = () => {
-	const { albums } = useMusicStore();
+	const { albums, fetchSongs } = useMusicStore();
 	const [songDialogOpen, setSongDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -44,17 +44,30 @@ const AddSongDialog = () => {
 	const imageInputRef = useRef<HTMLInputElement>(null);
 
 	const handleSubmit = async () => {
+		// Form validation
+		if (!newSong.title.trim()) {
+			return toast.error("Please enter a song title");
+		}
+		if (!newSong.artist.trim()) {
+			return toast.error("Please enter an artist name");
+		}
+		if (!files.audio) {
+			return toast.error("Please upload an audio file");
+		}
+		if (!files.image) {
+			return toast.error("Please upload an image file");
+		}
+		if (!newSong.duration || parseInt(newSong.duration) <= 0) {
+			return toast.error("Please enter a valid duration");
+		}
+
 		setIsLoading(true);
 
 		try {
-			if (!files.audio || !files.image) {
-				return toast.error("Please upload both audio and image files");
-			}
-
 			const formData = new FormData();
 
-			formData.append("title", newSong.title);
-			formData.append("artist", newSong.artist);
+			formData.append("title", newSong.title.trim());
+			formData.append("artist", newSong.artist.trim());
 			formData.append("duration", newSong.duration);
 			if (newSong.album && newSong.album !== "none") {
 				formData.append("albumId", newSong.album);
@@ -69,6 +82,7 @@ const AddSongDialog = () => {
 				},
 			});
 
+			// Reset form
 			setNewSong({
 				title: "",
 				artist: "",
@@ -80,9 +94,19 @@ const AddSongDialog = () => {
 				audio: null,
 				image: null,
 			});
+
+			// Reset file inputs
+			if (audioInputRef.current) audioInputRef.current.value = "";
+			if (imageInputRef.current) imageInputRef.current.value = "";
+
+			// Close dialog and refresh songs list
+			setSongDialogOpen(false);
+			await fetchSongs();
 			toast.success("Song added successfully");
 		} catch (error: any) {
-			toast.error("Failed to add song: " + error.message);
+			const errorMessage = error.response?.data?.message || error.message || "Failed to add song";
+			console.error("Error adding song:", error);
+			toast.error(errorMessage);
 		} finally {
 			setIsLoading(false);
 		}

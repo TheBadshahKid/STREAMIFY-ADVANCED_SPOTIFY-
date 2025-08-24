@@ -82,7 +82,29 @@ app.use((err, req, res, next) => {
 	res.status(500).json({ message: process.env.NODE_ENV === "production" ? "Internal server error" : err.message });
 });
 
+// Ensure temp directory exists
+const ensureTempDirectory = () => {
+	const tempDir = path.join(process.cwd(), "tmp");
+	try {
+		if (!fs.existsSync(tempDir)) {
+			fs.mkdirSync(tempDir, { recursive: true });
+			console.log("✅ Created temp directory:", tempDir);
+		} else {
+			console.log("✅ Temp directory exists:", tempDir);
+		}
+		// Test write permissions
+		const testFile = path.join(tempDir, "test-write.tmp");
+		fs.writeFileSync(testFile, "test");
+		fs.unlinkSync(testFile);
+		console.log("✅ Temp directory has write permissions");
+	} catch (error) {
+		console.error("❌ Temp directory error:", error.message);
+		console.error("This may cause file upload issues!");
+	}
+};
+
 httpServer.listen(PORT, () => {
 	console.log("Server is running on port " + PORT);
+	ensureTempDirectory();
 	connectDB();
 });

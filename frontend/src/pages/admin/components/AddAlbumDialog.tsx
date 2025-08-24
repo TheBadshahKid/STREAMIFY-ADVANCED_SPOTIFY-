@@ -10,11 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { axiosInstance } from "@/lib/axios";
+import { useMusicStore } from "@/stores/useMusicStore";
 import { Plus, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const AddAlbumDialog = () => {
+	const { fetchAlbums } = useMusicStore();
 	const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,16 +37,26 @@ const AddAlbumDialog = () => {
 	};
 
 	const handleSubmit = async () => {
+		// Form validation
+		if (!newAlbum.title.trim()) {
+			return toast.error("Please enter an album title");
+		}
+		if (!newAlbum.artist.trim()) {
+			return toast.error("Please enter an artist name");
+		}
+		if (!imageFile) {
+			return toast.error("Please upload an album cover image");
+		}
+		if (!newAlbum.releaseYear || newAlbum.releaseYear < 1900 || newAlbum.releaseYear > new Date().getFullYear()) {
+			return toast.error("Please enter a valid release year");
+		}
+
 		setIsLoading(true);
 
 		try {
-			if (!imageFile) {
-				return toast.error("Please upload an image");
-			}
-
 			const formData = new FormData();
-			formData.append("title", newAlbum.title);
-			formData.append("artist", newAlbum.artist);
+			formData.append("title", newAlbum.title.trim());
+			formData.append("artist", newAlbum.artist.trim());
 			formData.append("releaseYear", newAlbum.releaseYear.toString());
 			formData.append("imageFile", imageFile);
 
@@ -54,16 +66,27 @@ const AddAlbumDialog = () => {
 				},
 			});
 
+			// Reset form
 			setNewAlbum({
 				title: "",
 				artist: "",
 				releaseYear: new Date().getFullYear(),
 			});
 			setImageFile(null);
+
+			// Reset file input
+			if (fileInputRef.current) {
+				fileInputRef.current.value = "";
+			}
+
+			// Close dialog and refresh albums list
 			setAlbumDialogOpen(false);
+			await fetchAlbums();
 			toast.success("Album created successfully");
 		} catch (error: any) {
-			toast.error("Failed to create album: " + error.message);
+			const errorMessage = error.response?.data?.message || error.message || "Failed to create album";
+			console.error("Error creating album:", error);
+			toast.error(errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
@@ -91,19 +114,26 @@ const AddAlbumDialog = () => {
 						className='hidden'
 					/>
 					<div
-						className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer'
+						className='flex items-center justify-center p-6 border-2 border-dashed border-zinc-700 rounded-lg cursor-pointer hover:border-violet-500 transition-colors'
 						onClick={() => fileInputRef.current?.click()}
 					>
 						<div className='text-center'>
-							<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
-								<Upload className='h-6 w-6 text-zinc-400' />
-							</div>
-							<div className='text-sm text-zinc-400 mb-2'>
-								{imageFile ? imageFile.name : "Upload album artwork"}
-							</div>
-							<Button variant='outline' size='sm' className='text-xs'>
-								Choose File
-							</Button>
+							{imageFile ? (
+								<div className='space-y-2'>
+									<div className='text-sm text-violet-500'>Image selected:</div>
+									<div className='text-xs text-zinc-400'>{imageFile.name.slice(0, 30)}</div>
+								</div>
+							) : (
+								<>
+									<div className='p-3 bg-zinc-800 rounded-full inline-block mb-2'>
+										<Upload className='h-6 w-6 text-zinc-400' />
+									</div>
+									<div className='text-sm text-zinc-400 mb-2'>Upload album artwork</div>
+									<Button variant='outline' size='sm' className='text-xs'>
+										Choose File
+									</Button>
+								</>
+							)}
 						</div>
 					</div>
 					<div className='space-y-2'>
