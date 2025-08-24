@@ -176,6 +176,17 @@ const ChatPage = () => {
                     maxHeight: 'calc(100vh - 280px)'
                   }}
                 >
+                  {/* Temporary test messages to verify scrolling */}
+                  {[...Array(20)].map((_, i) => (
+                    <div key={`temp-${i}`} className="p-3 bg-zinc-700 rounded-lg text-white mb-3">
+                      <div className="font-medium text-green-400">Test Message {i + 1}</div>
+                      <div className="text-sm text-zinc-300 mt-1">
+                        This is test message number {i + 1} to verify that scrolling works properly.
+                      </div>
+                      <div className="text-xs text-zinc-400 mt-2">{new Date().toLocaleTimeString()}</div>
+                    </div>
+                  ))}
+                  
                   {messages.map((message) => (
                     <div
                       key={message._id}
