@@ -13,6 +13,23 @@ const UsersList = () => {
     onlineUsers,
   } = useChatStore();
 
+  // Sort users: selected user first, then online users, then offline users
+  const sortedUsers = [...users].sort((a, b) => {
+    // If one is the selected user, it goes first
+    if (selectedUser?.clerkId === a.clerkId) return -1;
+    if (selectedUser?.clerkId === b.clerkId) return 1;
+    
+    // Then sort by online status
+    const aOnline = onlineUsers.has(a.clerkId);
+    const bOnline = onlineUsers.has(b.clerkId);
+    
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    
+    // Finally, sort alphabetically by name
+    return a.fullName.localeCompare(b.fullName);
+  });
+
   return (
     <div className="h-full flex flex-col bg-zinc-900/30">
       {/* Header */}
@@ -26,7 +43,7 @@ const UsersList = () => {
           {isLoading ? (
             <UsersListSkeleton />
           ) : (
-            users.map((user) => (
+            sortedUsers.map((user) => (
               <div
                 key={user._id}
                 onClick={() => setSelectedUser(user)}

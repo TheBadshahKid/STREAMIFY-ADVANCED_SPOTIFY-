@@ -21,7 +21,8 @@ const ChatPage = () => {
   const { user } = useUser();
   const { messages, selectedUser, fetchUsers, fetchMessages } = useChatStore();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const { isMobile, isTablet } = useResponsive();
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const { isMobile, isTablet, windowSize } = useResponsive();
 
   useEffect(() => {
     if (user) fetchUsers();
@@ -31,19 +32,51 @@ const ChatPage = () => {
     if (selectedUser) fetchMessages(selectedUser.clerkId);
   }, [selectedUser, fetchMessages]);
 
-  // Auto-scroll to bottom on new messages
-  useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // Temporarily disabled auto-scroll to test manual scrolling
+  // useLayoutEffect(() => {
+  //   if (messagesEndRef.current && chatScrollRef.current) {
+  //     const scrollContainer = chatScrollRef.current;
+  //     const scrollHeight = scrollContainer.scrollHeight;
+  //     const scrollTop = scrollContainer.scrollTop;
+  //     const clientHeight = scrollContainer.clientHeight;
+  //     
+  //     // Only auto-scroll if user is near the bottom (within 100px) or if it's a new conversation
+  //     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+  //     
+  //     if (isNearBottom || messages.length === 1) {
+  //       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  //     }
+  //   }
+  // }, [messages]);
 
-  if (isMobile) {
+  // // Scroll to bottom when a new conversation is selected
+  // useLayoutEffect(() => {
+  //   if (selectedUser && messagesEndRef.current) {
+  //     // Use setTimeout to ensure DOM has updated
+  //     setTimeout(() => {
+  //       messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+  //     }, 100);
+  //   }
+  // }, [selectedUser]);
+
+  // For very small screens (phones), use single-pane mobile layout
+  const useMobileLayout = windowSize.width < 640; // sm breakpoint
+  
+  if (useMobileLayout) {
     return (
-      <div className="h-full bg-gradient-to-b from-zinc-800 to-zinc-900 overflow-hidden flex flex-col rounded-lg">
+      <div className="h-screen max-h-screen bg-gradient-to-b from-zinc-800 to-zinc-900 overflow-hidden flex flex-col">
         <div className="flex-1 flex flex-col min-h-0">
           {selectedUser ? (
             <>
               <ChatHeader />
-              <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3 overflow-x-hidden max-w-full">
+              <div 
+                ref={chatScrollRef}
+                className="flex-1 px-3 py-4 space-y-3 overflow-y-auto overflow-x-hidden max-w-full"
+                style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#71717a #27272a'
+                }}
+              >
                 {messages.map((message) => (
                   <div
                     key={message._id}
@@ -113,12 +146,12 @@ const ChatPage = () => {
   }
 
   return (
-    <main className="rounded-md overflow-hidden h-full bg-gradient-to-b from-zinc-800 to-zinc-900">
+    <main className="rounded-md overflow-hidden h-screen max-h-screen bg-gradient-to-b from-zinc-800 to-zinc-900 flex flex-col">
       <Topbar />
       
       {/* Main content grid */}
       <div className={cn(
-        "grid h-[calc(100vh-180px)] min-h-0",
+        "grid flex-1 min-h-0",
         isTablet ? "grid-cols-[250px_1fr]" : "grid-cols-[300px_1fr]"
       )}>
         {/* Sidebar */}
@@ -130,34 +163,30 @@ const ChatPage = () => {
         <div className="flex flex-col h-full min-w-0">
             {selectedUser ? (
               <>
-                <div className="bg-zinc-900 border-b border-zinc-700 px-4 py-3 flex-shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex-shrink-0">
-                      <Avatar className="size-10">
-                        <AvatarImage
-                          src={selectedUser.imageUrl}
-                          alt={selectedUser.fullName}
-                        />
-                        <AvatarFallback className="bg-purple-600 text-white font-semibold">
-                          {selectedUser.fullName.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-zinc-900 bg-gray-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="font-semibold text-white text-base truncate">
-                        {selectedUser.fullName}
-                      </h2>
-                      <p className="text-zinc-400 text-sm">Offline</p>
-                    </div>
-                  </div>
-                </div>
-                <div
+                <ChatHeader />
+                <div 
+                  ref={chatScrollRef}
                   className={cn(
-                    "flex-1 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent overflow-x-hidden max-w-full",
+                    "space-y-4 overflow-y-scroll overflow-x-hidden",
                     isTablet ? "px-3 py-3" : "px-4 py-4"
                   )}
+                  style={{
+                    height: 'calc(100vh - 280px)', // Explicit height for scroll container
+                    minHeight: '400px',
+                    maxHeight: 'calc(100vh - 280px)'
+                  }}
                 >
+                  {/* Temporary test messages to verify scrolling */}
+                  {[...Array(20)].map((_, i) => (
+                    <div key={`temp-${i}`} className="p-3 bg-zinc-700 rounded-lg text-white mb-3">
+                      <div className="font-medium text-green-400">Test Message {i + 1}</div>
+                      <div className="text-sm text-zinc-300 mt-1">
+                        This is test message number {i + 1} to verify that scrolling works properly.
+                      </div>
+                      <div className="text-xs text-zinc-400 mt-2">{new Date().toLocaleTimeString()}</div>
+                    </div>
+                  ))}
+                  
                   {messages.map((message) => (
                     <div
                       key={message._id}
