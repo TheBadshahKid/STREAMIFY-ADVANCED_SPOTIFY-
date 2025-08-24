@@ -12,7 +12,7 @@ const MessageInput = () => {
   const [newMessage, setNewMessage] = useState("");
   const { user } = useUser();
   const { selectedUser, sendMessage } = useChatStore();
-  const { isMobile, isTablet } = useResponsive();
+  const { isMobile } = useResponsive();
 
   const handleSend = () => {
     if (!selectedUser || !user || !newMessage.trim()) return;

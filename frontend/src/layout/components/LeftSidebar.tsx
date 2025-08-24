@@ -11,7 +11,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 
 const LeftSidebar = () => {
 	const { albums, fetchAlbums, isLoading } = useMusicStore();
-	const { isMobile, isTablet, breakpoint } = useResponsive();
+	const { isMobile, isTablet } = useResponsive();
 
 	useEffect(() => {
 		fetchAlbums();
@@ -133,8 +133,8 @@ const LeftSidebar = () => {
 			{/* Mobile Library - Simplified */}
 			{isMobile && (
 				<div className='flex-1 rounded-lg bg-zinc-900 p-2 min-h-0'>
-					<div className='flex items-center justify-center mb-2'>
-						<Library className='size-5 text-white' title="Library" />
+					<div className='flex items-center justify-center mb-2' title="Library">
+						<Library className='size-5 text-white' />
 					</div>
 					
 					<ScrollArea className='h-full max-h-[calc(100vh-200px)]'>

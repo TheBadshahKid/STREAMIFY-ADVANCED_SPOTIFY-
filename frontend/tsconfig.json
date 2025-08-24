@@ -4,11 +4,13 @@
 	"compilerOptions": {
          "strict" : true,
 		 "forceConsistentCasingInFileNames": true,
+		  "skipLibCheck": true,
+          "noUnusedLocals": false,
+           "noUnusedParameters": false,
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"]
 		},
-		"noUnusedLocals": false,
-    	"noUnusedParameters": false
+		
 	}
 }

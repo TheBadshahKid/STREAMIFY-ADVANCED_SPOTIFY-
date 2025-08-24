@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const ChatHeader = () => {
   const { selectedUser, onlineUsers, setSelectedUser } = useChatStore();
-  const { isMobile} = useResponsive();
+  const { isMobile } = useResponsive();
 
   if (!selectedUser) return null;
 
