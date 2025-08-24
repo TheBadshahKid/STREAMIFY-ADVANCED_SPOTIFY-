@@ -5,6 +5,8 @@ import FeaturedSection from "./components/FeaturedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
+import { useResponsive } from "@/hooks/useResponsive";
+import { cn } from "@/lib/utils";
 
 const HomePage = () => {
 	const {
@@ -18,6 +20,7 @@ const HomePage = () => {
 	} = useMusicStore();
 
 	const { initializeQueue } = usePlayerStore();
+	const { isMobile, isTablet } = useResponsive();
 
 	useEffect(() => {
 		fetchFeaturedSongs();
@@ -35,14 +38,38 @@ const HomePage = () => {
 	return (
 		<main className='rounded-md overflow-hidden h-full bg-gradient-to-b from-zinc-800 to-zinc-900'>
 			<Topbar />
-			<ScrollArea className='h-[calc(100vh-180px)]'>
-				<div className='p-4 sm:p-6'>
-					<h1 className='text-2xl sm:text-3xl font-bold mb-6'>Good afternoon</h1>
+			<ScrollArea className={cn(
+				'h-full',
+				isMobile ? 'h-[calc(100vh-140px)]' : 'h-[calc(100vh-180px)]'
+			)}>
+				<div className={cn(
+					'pb-6',
+					isMobile ? 'p-3' : isTablet ? 'p-4' : 'p-6'
+				)}>
+					{/* Greeting */}
+					<h1 className={cn(
+						'font-bold mb-6 text-white',
+						isMobile ? 'text-xl mb-4' : isTablet ? 'text-2xl mb-5' : 'text-3xl mb-6'
+					)}>Good afternoon</h1>
+					
+					{/* Featured Section */}
 					<FeaturedSection />
 
-					<div className='space-y-8'>
-						<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />
-						<SectionGrid title='Trending' songs={trendingSongs} isLoading={isLoading} />
+					{/* Music Sections */}
+					<div className={cn(
+						'space-y-6',
+						isMobile ? 'space-y-4 mt-6' : isTablet ? 'space-y-6 mt-8' : 'space-y-8 mt-8'
+					)}>
+						<SectionGrid 
+							title='Made For You' 
+							songs={madeForYouSongs} 
+							isLoading={isLoading} 
+						/>
+						<SectionGrid 
+							title='Trending' 
+							songs={trendingSongs} 
+							isLoading={isLoading} 
+						/>
 					</div>
 				</div>
 			</ScrollArea>

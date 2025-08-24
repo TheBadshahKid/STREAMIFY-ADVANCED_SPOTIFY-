@@ -1,9 +1,12 @@
 import { useMusicStore } from "@/stores/useMusicStore";
 import { Library, ListMusic, PlayCircle, Users2 } from "lucide-react";
 import StatsCard from "./StatsCard";
+import { useResponsive } from "@/hooks/useResponsive";
+import { cn } from "@/lib/utils";
 
 const DashboardStats = () => {
 	const { stats } = useMusicStore();
+	const { isMobile, isTablet } = useResponsive();
 
 	const statsData = [
 		{
@@ -37,7 +40,14 @@ const DashboardStats = () => {
 	];
 
 	return (
-		<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 '>
+		<div className={cn(
+			'grid gap-4 mb-6',
+			isMobile 
+				? 'grid-cols-2 gap-3 mb-4' 
+				: isTablet 
+					? 'grid-cols-2 lg:grid-cols-4 mb-6'
+					: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-8'
+		)}>
 			{statsData.map((stat) => (
 				<StatsCard
 					key={stat.label}

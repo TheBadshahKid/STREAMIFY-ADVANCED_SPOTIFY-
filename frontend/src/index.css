@@ -67,3 +67,57 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+@layer utilities {
+	/* Custom scrollbar styles */
+	.scrollbar-thin {
+		scrollbar-width: thin;
+	}
+	.scrollbar-thumb-zinc-600::-webkit-scrollbar-thumb {
+		background-color: rgb(82 82 91);
+		border-radius: 6px;
+	}
+	.scrollbar-track-transparent::-webkit-scrollbar-track {
+		background-color: transparent;
+	}
+	.scrollbar-thin::-webkit-scrollbar {
+		width: 6px;
+	}
+	
+	/* Word wrapping utilities for chat messages */
+	.word-wrap-anywhere {
+		word-wrap: anywhere;
+		overflow-wrap: anywhere;
+		word-break: break-word;
+		hyphens: auto;
+	}
+	
+	.break-words-force {
+		word-break: break-word;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
+		max-width: 100%;
+		min-width: 0;
+	}
+	
+	/* Prevent text overflow in chat bubbles */
+	.chat-message {
+		max-width: 100%;
+		min-width: 0;
+		word-break: break-all;
+		overflow-wrap: anywhere;
+		white-space: pre-wrap;
+		line-break: anywhere;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	
+	.chat-bubble {
+		max-width: 100%;
+		min-width: 0;
+		overflow: hidden;
+		word-break: break-all;
+		overflow-wrap: anywhere;
+		box-sizing: border-box;
+	}
+}
